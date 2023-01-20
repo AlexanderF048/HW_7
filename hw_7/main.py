@@ -38,7 +38,7 @@ def query_2():
 
 def query_3():
     db_selection = session.query(Groups.group_name, Students.student_name, Grades.g_course_id, func.avg(Grades.grade) \
-                                 .label('AVG_GRADE')).select_from(Grades).join(Students).join(Groups).join(Courses).group_by(Groups.group_name).filter(
+                                 .label('AVG_GRADE')).select_from(Grades).join(Students).join(Groups).join(Courses).filter(
         Courses.course_id == 2, Groups.group_name == "group - A")
     return db_selection
 
