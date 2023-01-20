@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "hw-7"
+version = "0.1.0"
+description = ""
+authors = ["AlexanderF048 <alexandr.frankevich@gmail.com>"]
+readme = "README.md"
+packages = [{include = "hw_7"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+sqlalchemy = "^1.4.46"
+alembic = "^1.9.2"
+psycopg2 = "^2.9.5"
+faker = "^16.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+postgres = "^4.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
