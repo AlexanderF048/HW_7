@@ -1,55 +1,102 @@
-from sqlalchemy import func, select, desc
+from sqlalchemy import func, select, desc, distinct
 
 from db_tables_creation import Grades, Groups, Students, Lecturers, Courses
 from db_connection import session
 
 
-# SELECT student_id , student_name , AVG(grades.grade) AS sort_avg FROM students
-# LEFT JOIN grades ON students.student_id = grades.g_student_id
-# GROUP BY student_id
-# ORDER BY sort_avg DESC
-# LIMIT 5
-
 def query_1():
     db_selection = session.query(Students.student_id, Students.student_name, func.round(func.avg(Grades.grade)) \
                                  .label('avg_grade')) \
-        .select_from(Students).join(Grades).group_by(Students.student_id).order_by(desc('avg_grade')).limit(5).all()
+        .select_from(Students) \
+        .join(Grades) \
+        .group_by(Students.student_id) \
+        .order_by(desc('avg_grade')).limit(5).all()
     return db_selection
 
 
-# SELECT g_student_id, students.student_name, g_course_name, MAX(grade) AS Higher_grade FROM grades
-# LEFT JOIN students ON grades.g_student_id = students.student_id
-# LEFT JOIN courses ON grades.g_course_name = courses.course_name
-# WHERE courses.course_id = 2
-
+# def query_2(): MAX не работает
+#    db_selection = session.query(Grades.g_student_id, Students.student_name, Grades.g_course_id,
+#                                 func.max(Grades.grade).label('Higher_grade')).select_from(Grades).join(Students).join(
+#        Courses).filter(
+#        Courses.course_id == 1).group_by(Grades.g_course_id).group_by(
+#        Grades.g_student_id, Students.student_id)
+#    return db_selection
 def query_2():
     db_selection = session.query(Grades.g_student_id, Students.student_name, Grades.g_course_id,
-                                 func.max(Grades.grade).label('Higher_grade')).select_from(Grades).join(Students).join(
-        Courses).filter(
-        Courses.course_id == 2)
+                                 Grades.grade.label('Higher_grade')).select_from(Grades) \
+        .join(Students).join(Courses) \
+        .order_by(desc('Higher_grade')) \
+        .filter(Courses.course_id == 1).limit(1)
     return db_selection
 
 
-# SELECT groups.group_name, students.student_name, g_course_name, AVG(grade) AS AVG_GRADE FROM grades
-# LEFT JOIN students ON grades.g_student_id = students.student_id
-# LEFT JOIN courses ON grades.g_course_name = courses.course_name
-# LEFT JOIN groups ON grades.g_student_id = groups.student_member_group
-# WHERE courses.course_id = 1 AND groups.group_name LIKE "%group - A%"
-
 def query_3():
-    db_selection = session.query(Groups.group_name, Students.student_name, Grades.g_course_id, func.avg(Grades.grade) \
-                                 .label('AVG_GRADE')).select_from(Grades).join(Students).join(Groups).join(Courses).filter(
-        Courses.course_id == 2, Groups.group_name == "group - A")
+    db_selection = session.query(Groups.group_name, func.avg(Grades.grade)).select_from(Grades) \
+        .group_by(Groups.group_name) \
+        .filter(Groups.group_name == 'group - A')
+
+    return db_selection
+
+
+def query_4():
+    db_selection = session.query(func.avg(Grades.grade).label('avg_course'))
+
+    return db_selection
+
+
+def query_5():
+    db_selection = session.query(Courses.course_name, Courses.speaker, Lecturers.lecturer_name).select_from(Lecturers) \
+        .join(Courses) \
+        .filter(Lecturers.lecturer_id == 1) \
+        .distinct(Courses.course_name)
+
+    return db_selection
+
+
+def query_6():
+    db_selection = session.query(Students.student_name, Groups.group_name).select_from(Students) \
+        .join(Groups) \
+        .filter(Groups.group_name == 'group - B')
+    return db_selection
+
+
+def query_7():
+    db_selection = session.query(Students.student_name, Grades.grade, Groups.group_name).select_from(Students) \
+        .join(Groups).join(Grades) \
+        .filter(Groups.group_name == 'group - B')
+    return db_selection
+
+
+def query_8():
+    db_selection = session.query(func.round(func.avg(Grades.grade), 2).label('avg_grade from this guy'),
+                                 Lecturers.lecturer_name) \
+        .select_from(Students) \
+        .join(Groups).join(Grades).filter(Groups.group_name == 'group - B', Lecturers.lecturer_id == 1) \
+        .group_by(Lecturers.lecturer_id)
+    return db_selection
+
+
+def query_9():
+    db_selection = session.query(Students.student_name, Courses.course_name).select_from(Grades) \
+        .join(Students).join(Courses) \
+        .filter(Students.student_name == 'Angela Davis                                      ')
+    return db_selection
+
+
+def query_10():
+    db_selection = session.query(Courses.course_name) \
+        .select_from(Grades) \
+        .filter(Courses.speaker == 1,
+                Students.student_name == 'Angela Davis                                       ').\
+        distinct(Courses.course_name)
+
     return db_selection
 
 
 if __name__ == '__main__':
-    # a = query_1()
-    # print('________________________________________QUERY # 1________________________________________')
-    # for i in a:
-    #    print(i)
-    # print('_________________________________________________________________________________________')
 
     rtr = query_3()
+    print(vars(rtr))
+
     for i in rtr:
         print(i)
