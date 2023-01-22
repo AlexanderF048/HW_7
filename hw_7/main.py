@@ -1,3 +1,4 @@
+import argparse
 from sqlalchemy import func, select, desc, distinct
 
 from db_tables_creation import Grades, Groups, Students, Lecturers, Courses
@@ -87,7 +88,7 @@ def query_10():
     db_selection = session.query(Courses.course_name) \
         .select_from(Grades) \
         .filter(Courses.speaker == 1,
-                Students.student_name == 'Angela Davis                                       ').\
+                Students.student_name == 'Angela Davis                                       '). \
         distinct(Courses.course_name)
 
     return db_selection
@@ -95,8 +96,18 @@ def query_10():
 
 if __name__ == '__main__':
 
-    rtr = query_3()
-    print(vars(rtr))
+    parser = argparse.ArgumentParser(prog='Execute QYERY to DB Postgresql')
+    parser.add_argument('-q', '--query_no', help='Enter No. of query(it can be from 1 to 10)')
+    args = parser.parse_args()
+    get_no = int(args.query_no)
+    print(get_no)
 
-    for i in rtr:
-        print(i)
+    if get_no in range(1, 10):
+        get_query = eval(f'query_{args.query_no}')
+        response_db = get_query()
+
+        for i in response_db:
+            print(i)
+
+    else:
+        print('No. of query not detected, it shold be 1 - 10')
